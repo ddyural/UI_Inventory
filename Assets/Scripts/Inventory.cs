@@ -27,11 +27,19 @@ public class Inventory : MonoBehaviour
 
     public GameObject _backGround; // фон
 
+    public RectTransform _inventoryMainRectTransform;
+    
+    // Поле для хранения ссылок на компоненты TextMeshProUGUI и Image
+    private Dictionary<int, TextMeshProUGUI[]> _textComponents = new Dictionary<int, TextMeshProUGUI[]>();
+    private Dictionary<int, Image[]> _imageComponents = new Dictionary<int, Image[]>();
+
     /// <summary>
     /// заполняем ячейки
     /// </summary>
     public void Start()
     {
+        _inventoryMainRectTransform = InventoryMainObject.GetComponent<RectTransform>();
+        
         if (items.Count == 0)
         {
             AddGraphics();
@@ -204,69 +212,94 @@ public class Inventory : MonoBehaviour
     public void MoveObject()
     {
         Vector3 pos = Input.mousePosition + _offest; // то есть когда мы передвигаем объект, картинка чуть-чуть смещаться
-        pos.z = InventoryMainObject.GetComponent<RectTransform>().position.z;
+        pos.z = _inventoryMainRectTransform.position.z;
         _movingObject.position = _cam.ScreenToWorldPoint(pos); // изображения будут отталкиваться от камеры, где мы хватаем элемент и где у нас на камере
         // где мы схватили и поместили
     }
 
+    // Метод для обновления ссылок на компоненты TextMeshProUGUI и Image
+    public void UpdateItemComponents(int itemId)
+    {
+        // Получаем объект элемента по ID
+        GameObject itemGameObject = items[itemId]._itemGameObject;
+
+        // Получаем компоненты TextMeshProUGUI и Image для данного элемента
+        TextMeshProUGUI[] texts = itemGameObject.GetComponentsInChildren<TextMeshProUGUI>();
+        Image[] images = itemGameObject.GetComponentsInChildren<Image>();
+
+        // Сохраняем ссылки в словари
+        _textComponents[itemId] = texts;
+        _imageComponents[itemId] = images;
+    }
+
     /// <summary>
-    /// обновляет содержимое инвентаря, основываясь на информации в массиве items
+    ///  выполняет обновление отображения инвентаря
     /// </summary>
     public void UpdateInventory()
     {
-        for (int i = 0; i < _maxCount; i++) // обработка каждого элемента инвентаря
+        for (int i = 0; i < _maxCount; i++)
         {
-            // проверяем, что id элемента не равен 0 и кол-во элементов больше 1
-            if (items[i]._id != 0 && items[i]._count > 1) // проверка, что в ячейке что-то присутствует 
+            if (_textComponents.ContainsKey(i) && _imageComponents.ContainsKey(i))
             {
-                // получаем все компоненты текста для данного элемента
-                TextMeshProUGUI[] texts = items[i]._itemGameObject.GetComponentsInChildren<TextMeshProUGUI>();
-
-                // обновляем текст для каждого компонента текста
-                foreach (TextMeshProUGUI text in texts)
+                if (items[i]._id != 0 && items[i]._count > 1)
                 {
-                    text.text = items[i]._count.ToString();
+                    foreach (TextMeshProUGUI text in _textComponents[i])
+                    {
+                        text.text = items[i]._count.ToString();
+                    }
                 }
-            }
-            else
-            {
-                // получаем все компоненты текста для данного элемента
-                TextMeshProUGUI[] texts = items[i]._itemGameObject.GetComponentsInChildren<TextMeshProUGUI>();
-
-                // обновляем текст для каждого компонента текста
-                foreach (TextMeshProUGUI text in texts)
+                else
                 {
-                    text.text = "";
+                    foreach (TextMeshProUGUI text in _textComponents[i])
+                    {
+                        text.text = "";
+                    }
                 }
-            }
 
-            // получаем все компоненты фоток для данного элемента
-            Image[] images = items[i]._itemGameObject.GetComponentsInChildren<Image>();
-
-            // присваиваем фоткам спрайты из данных
-            foreach (Image image in images)
-            {
-                image.sprite = data.items[items[i]._id]._image;
+                foreach (Image image in _imageComponents[i])
+                {
+                    image.sprite = data.items[items[i]._id]._image;
+                }
             }
         }
     }
+
 
     /// <summary>
     /// обработка выбора и перемещения элементов в инвентаре
     /// </summary>
     public void SelectObject()
     {
+        int _selectedId = int.Parse(_es.currentSelectedGameObject.name);
+        ItemInventory _selectedSlot = items[_selectedId];
+
+        if (_selectedSlot._id == 0)
+        {
+            // необходимо игнорировать пустые слоты при выборе для перемещения
+            Debug.Log("You can't select an empty slot to move.");
+            
+            return;
+        }
+        
         if (_currentID == -1) // пустая ячейка
         {
-            _currentID = int.Parse(_es.currentSelectedGameObject.name); // в число
-            _currentItem = CopyInventoryItem(items[_currentID]); // создание копии
-            _movingObject.gameObject.SetActive(true);
-            _movingObject.GetComponent<Image>().sprite = data.items[_currentItem._id]._image; 
-            // задаём спрайт перемещаемому объекту на основе данных элемента
+            if (_selectedSlot._id == 0)
+            {
+                // необходимо игнорировать пустые слоты при выборе для перемещения
+                Debug.Log("You can't select an empty slot to move.");
+                
+            }
+            else
+            {
+                _currentID = int.Parse(_es.currentSelectedGameObject.name); // в число
+                _currentItem = CopyInventoryItem(items[_currentID]); // создание копии
+                _movingObject.gameObject.SetActive(true);
+                _movingObject.GetComponent<Image>().sprite = data.items[_currentItem._id]._image; 
+                // задаём спрайт перемещаемому объекту на основе данных элемента
 
-            AddItem(_currentID, data.items[0], 0); // id, item, count
-            // добавляем пустой элемент в инвентарь для замены перемещаемого элемента
-
+                AddItem(_currentID, data.items[0], 0); // id, item, count
+                // добавляем пустой элемент в инвентарь для замены перемещаемого элемента
+            }
         }
         else
         {
@@ -297,13 +330,10 @@ public class Inventory : MonoBehaviour
                 II._itemGameObject.GetComponentInChildren<TextMeshProUGUI>().text = II._count.ToString();
 
             }
-
-
-
+            
             _currentID = -1;
 
             _movingObject.gameObject.SetActive(false); // всё, мы перенесли наш предмет
-
         }
     }
 
