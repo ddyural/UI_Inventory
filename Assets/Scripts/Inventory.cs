@@ -1,8 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+
 
 public class Inventory : MonoBehaviour
 {
@@ -23,9 +25,37 @@ public class Inventory : MonoBehaviour
     public RectTransform _movingObject;
     public Vector3 _offest; // когда мы будем брать какой-то элемент, он должен немного сместиться от курсора
 
+    public Vector3 _pos;
+
+    public void Start()
+    {
+        Vector3 _pos = Input.mousePosition + _offest; 
+        _pos.z = InventoryMainObject.GetComponent<RectTransform>().position.z;
+        
+        if (items.Count == 0)
+        {
+            AddGraphics();
+        }
+
+        // заполнение ячеек рандомно элементами, просто тест
+        for (int i = 0; i < _maxCount; i++) 
+        {
+            AddItem(i, data.items[Random.Range(0, data.items.Count)], Random.Range(1, 99));
+        }
+    }
+
+    public void Update()
+    {
+        if (_currentID != -1 )
+        {
+            MoveObject();
+        }
+        UpdateInventory();
+    }
+
 
     /// <summary>
-    /// добавление предмета
+    /// добавление предмета в инвентарь
     /// </summary>
     /// <param name="_id">для сортировки</param>
     /// <param name="item">сам предмет</param>
@@ -38,17 +68,18 @@ public class Inventory : MonoBehaviour
         // спрайт фоточка. Чтоб он забирал инфу с скрипта нашего DataBase и отображал здесь изображение
         // + чтобы считывалось id из инвентаря 
 
-        Text[] texts = items[_id]._itemGameObject.GetComponentsInChildren<Text>();
-        foreach (Text text in texts)
+        TextMeshProUGUI[] texts = items[_id]._itemGameObject.GetComponentsInChildren<TextMeshProUGUI>();
+        foreach (TextMeshProUGUI text in texts)
         {
-            text.text = (_count > 0 && item._id != 0) ? _count.ToString() : ""; // если в ячейке объектов больше одного, то будет забирать инфу 
+            text.text = (_count > 0 && item._id != 0) ? _count.ToString() : "";
+            // если в ячейке объектов больше одного, то будет забирать инфу 
             // у подчинённого предмета и переведёт количество в текст
             // это позволит сплюсовать те элементы, которые у нас есть
         }
     }
         
     /// <summary>
-    /// добавление предмета
+    /// ItemInventory
     /// </summary>
     /// <param name="_id"></param>
     /// <param name="invItem"></param>
@@ -60,10 +91,13 @@ public class Inventory : MonoBehaviour
         // спрайт фоточка. Чтоб он забирал инфу с скрипта нашего DataBase и отображал здесь изображение
         // + чтобы считывалось id из инвентаря 
 
-        Text[] texts = items[_id]._itemGameObject.GetComponentsInChildren<Text>();
-        foreach (Text text in texts)
+        TextMeshProUGUI[] texts = items[_id]._itemGameObject.GetComponentsInChildren<TextMeshProUGUI>();
+        foreach (TextMeshProUGUI text in texts)
         {
             text.text = (invItem._count > 0 && invItem._id != 0) ? invItem._count.ToString() : "";
+            // если в ячейке объектов больше одного, то будет забирать инфу 
+            // у подчинённого предмета и переведёт количество в текст
+            // это позволит сплюсовать те элементы, которые у нас есть
         }
     }
 
@@ -106,17 +140,17 @@ public class Inventory : MonoBehaviour
             items.Add(ii); // добавляем элемент в ItemInventory
         }
     }
-
-
+    
     /// <summary>
     /// передвигаем объект
     /// </summary>
     public void MoveObject()
     {
-        Vector3 pos = Input.mousePosition + _offest; // то есть когда мы передвигаем объект, картинка чуть-чуть смещаться
-        pos.z = InventoryMainObject.GetComponent<RectTransform>().position.z;
-        _movingObject.position = _cam.ScreenToWorldPoint(pos); // изображения будут отталкиваться от камеры, где мы хватаем элемент и где у нас на камере
-        // где мы схватили и поместили
+        _movingObject.position = _cam.ScreenToWorldPoint(_pos); 
+        // изображения будут отталкиваться от камеры, где мы хватаем элемент 
+        // то есть когда мы передвигаем объект, картинка чуть-чуть смещаться
+        // значение _pos в Start()
+        
     }
 
     /// <summary>
@@ -130,10 +164,10 @@ public class Inventory : MonoBehaviour
             if (items[i]._id != 0 && items[i]._count > 1) // проверка, что в ячейке что-то присутствует 
             {
                 // получаем все компоненты текста для данного элемента
-                Text[] texts = items[i]._itemGameObject.GetComponentsInChildren<Text>();
+                TextMeshProUGUI[] texts = items[i]._itemGameObject.GetComponentsInChildren<TextMeshProUGUI>();
 
                 // обновляем текст для каждого компонента текста
-                foreach (Text text in texts)
+                foreach (TextMeshProUGUI text in texts)
                 {
                     text.text = items[i]._count.ToString();
                 }
@@ -141,10 +175,10 @@ public class Inventory : MonoBehaviour
             else
             {
                 // получаем все компоненты текста для данного элемента
-                Text[] texts = items[i]._itemGameObject.GetComponentsInChildren<Text>();
+                TextMeshProUGUI[] texts = items[i]._itemGameObject.GetComponentsInChildren<TextMeshProUGUI>();
 
-                // очищаем текст для каждого компонента текста
-                foreach (Text text in texts)
+                // обновляем текст для каждого компонента текста
+                foreach (TextMeshProUGUI text in texts)
                 {
                     text.text = "";
                 }
@@ -208,8 +242,6 @@ public class Inventory : MonoBehaviour
 
         return New;
     }
-
-    
 }
 
 [System.Serializable]
