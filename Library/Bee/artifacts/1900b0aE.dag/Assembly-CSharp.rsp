@@ -395,6 +395,8 @@
 -analyzer:"C:/AllNew/Programs/Unity Hub/Hub/Editor/6000.0.0b14/Editor/Data/Tools/Unity.SourceGenerators/Unity.UIToolkit.SourceGenerator.dll"
 "Assets/Scripts/DataBase.cs"
 "Assets/Scripts/Inventory.cs"
+"Assets/Scripts/ItemInventory.cs"
+"Assets/Scripts/OpenInventory.cs"
 -langversion:9.0
 
 /deterministic

@@ -18,23 +18,22 @@ public class Inventory : MonoBehaviour
     public ItemInventory currentItem;
     public RectTransform movingObject;
     public Vector3 offset;
-    public GameObject background;
     private RectTransform _rectTransform;
     private Dictionary<int, TextMeshProUGUI[]> _textComponents = new Dictionary<int, TextMeshProUGUI[]>();
     private Dictionary<int, Image[]> _imageComponents = new Dictionary<int, Image[]>();
 
     public void Start()
     {
+        AddGraphics();
         _rectTransform = inventoryMainObject.GetComponent<RectTransform>();
-        if (items.Count == 0)
-        {
-            AddGraphics();
-        }
-
         for (int i = 0; i < maxCount; i++)
         {
-            AddItem(i, data.items[Random.Range(0, data.items.Count)], Random.Range(1, 99));
+            Item randomItem = data.items[Random.Range(0, data.items.Count)];
+            int randomCount = Random.Range(1, 99);
+            AddItem(i, randomItem, randomCount);
         }
+        
+        //graphicsHandler.InitializeInventory(items, inventorySlotPrefab, inventoryMainObject);
     }
 
     public void Update()
@@ -44,14 +43,39 @@ public class Inventory : MonoBehaviour
             MoveObject();
         }
         UpdateInventory();
-
-        if (Input.GetKeyDown(KeyCode.I))
+        
+    }
+    
+    public void AddGraphics()
+    {
+        if (inventorySlotPrefab == null || inventoryMainObject == null)
         {
-            background.SetActive(!background.activeSelf);
-            if (background.activeSelf)
+            Debug.LogError("InventoryGraphicsHandler: inventorySlotPrefab or inventoryMainObject is not initialized!");
+            return;
+        }
+
+        for (int i = 0; i < maxCount; i++)
+        {
+            GameObject newItem = Instantiate(inventorySlotPrefab, inventoryMainObject.transform);
+            newItem.name = i.ToString();
+
+            ItemInventory ii = new ItemInventory();
+            ii.itemGameObject = newItem;
+
+            RectTransform rt = newItem.GetComponent<RectTransform>();
+            rt.localPosition = Vector3.zero;
+            rt.localScale = Vector3.one;
+
+            RectTransform[] childRTs = newItem.GetComponentsInChildren<RectTransform>();
+            foreach (RectTransform childRT in childRTs)
             {
-                UpdateInventory();
+                childRT.localScale = Vector3.one;
             }
+
+            Button tempButton = newItem.GetComponent<Button>();
+            tempButton.onClick.AddListener(delegate { SelectObject(); });
+
+            items.Add(ii);
         }
     }
 
@@ -95,14 +119,21 @@ public class Inventory : MonoBehaviour
 
     public void AddItem(int id, Item item, int count)
     {
-        items[id].id = item.id;
-        items[id].count = count;
-        items[id].itemGameObject.GetComponent<Image>().sprite = item.image;
-
-        TextMeshProUGUI[] texts = items[id].itemGameObject.GetComponentsInChildren<TextMeshProUGUI>();
-        foreach (TextMeshProUGUI text in texts)
+        if (id >= 0 && id < items.Count)
         {
-            text.text = (count > 0 && item.id != 0) ? count.ToString() : "";
+            items[id].id = item.id;
+            items[id].count = count;
+            items[id].itemGameObject.GetComponent<Image>().sprite = item.image;
+
+            TextMeshProUGUI[] texts = items[id].itemGameObject.GetComponentsInChildren<TextMeshProUGUI>();
+            foreach (TextMeshProUGUI text in texts)
+            {
+                text.text = (count > 0 && item.id != 0) ? count.ToString() : "";
+            }
+        }
+        else
+        {
+            Debug.LogError("Index out of bounds: " + id);
         }
     }
 
@@ -118,34 +149,7 @@ public class Inventory : MonoBehaviour
             text.text = (invItem.count > 0 && invItem.id != 0) ? invItem.count.ToString() : "";
         }
     }
-
-    public void AddGraphics()
-    {
-        for (int i = 0; i < maxCount; i++)
-        {
-            GameObject newItem = Instantiate(inventorySlotPrefab, inventoryMainObject.transform);
-            newItem.name = i.ToString();
-
-            ItemInventory ii = new ItemInventory();
-            ii.itemGameObject = newItem;
-
-            RectTransform rt = newItem.GetComponent<RectTransform>();
-            rt.localPosition = Vector3.zero;
-            rt.localScale = Vector3.one;
-
-            RectTransform[] childRTs = newItem.GetComponentsInChildren<RectTransform>();
-            foreach (RectTransform childRT in childRTs)
-            {
-                childRT.localScale = Vector3.one;
-            }
-
-            Button tempButton = newItem.GetComponent<Button>();
-            tempButton.onClick.AddListener(delegate { SelectObject(); });
-
-            items.Add(ii);
-        }
-    }
-
+    
     public void MoveObject()
     {
         Vector3 pos = Input.mousePosition + offset;
@@ -251,13 +255,5 @@ public class Inventory : MonoBehaviour
         New.itemGameObject = old.itemGameObject;
         New.count = old.count;
         return New;
-    }
-
-    [System.Serializable]
-    public class ItemInventory
-    {
-        public int id;
-        public GameObject itemGameObject;
-        public int count;
     }
 }
