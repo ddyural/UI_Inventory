@@ -13,8 +13,19 @@ public class Inventory : MonoBehaviour
     public GameObject InventoryMainObject; // надо подключить то, за что этот блок будет отвечать
     public int _maxCount;
 
+    public Camera _cam;
+
+    public EventSystem _es;
+
+    public int _currentID;
+    public ItemInventory _currentItem;
+
+    public RectTransform _movingObject;
+    public Vector3 _offest; // когда мы будем брать какой-то элемент, он должен немного сместиться от курсора
+
+
     /// <summary>
-    /// добавление предметика
+    /// добавление предмета
     /// </summary>
     /// <param name="_id">для сортировки</param>
     /// <param name="item">сам предмет</param>
@@ -23,7 +34,7 @@ public class Inventory : MonoBehaviour
     {
         items[_id]._id = item._id; // наш id айтемсов будет считываться, сравниваться, переписываться, поэтому нужно
         items[_id]._count = _count;
-        items[_id]._itemGameObject.GetComponent<Image>().sprite = item._image;  // = item._image; 
+        items[_id]._itemGameObject.GetComponent<Image>().sprite = item._image; // data.items[Item._id];
         // спрайт фоточка. Чтоб он забирал инфу с скрипта нашего DataBase и отображал здесь изображение
         // + чтобы считывалось id из инвентаря 
 
@@ -37,7 +48,7 @@ public class Inventory : MonoBehaviour
     }
         
     /// <summary>
-    /// наш ItemInventory list
+    /// добавление предмета
     /// </summary>
     /// <param name="_id"></param>
     /// <param name="invItem"></param>
@@ -73,6 +84,8 @@ public class Inventory : MonoBehaviour
             rt.localPosition = Vector3.zero; 
             rt.localScale = Vector3.one; // чтобы ячейки не скакали и были одинаковые
 
+            // получаем все компоненты RectTransform в дочерних объектах newItem (нового объекта)
+            // устанавливает для каждого из них масштаб scale равным (1, 1, 1)
             RectTransform[] childRTs = newItem.GetComponentsInChildren<RectTransform>();
             foreach (RectTransform childRT in childRTs)
             {
@@ -82,12 +95,121 @@ public class Inventory : MonoBehaviour
             // этот элемент, чтобы scale был такой же
 
 
+
             Button tempButton = newItem.GetComponent<Button>(); // каждый пункт инвенторя - кнопка
             // но можем нажимать только когда там что-то есть
 
+            tempButton.onClick.AddListener(delegate { SelectObject(); });
+            // обработчик события клика на кнопке tempButton
+            // когда пользователь кликает на эту кнопку, будет вызван метод SelectObject().
+
             items.Add(ii); // добавляем элемент в ItemInventory
         }
-    } 
+    }
+
+
+    /// <summary>
+    /// передвигаем объект
+    /// </summary>
+    public void MoveObject()
+    {
+        Vector3 pos = Input.mousePosition + _offest; // то есть когда мы передвигаем объект, картинка чуть-чуть смещаться
+        pos.z = InventoryMainObject.GetComponent<RectTransform>().position.z;
+        _movingObject.position = _cam.ScreenToWorldPoint(pos); // изображения будут отталкиваться от камеры, где мы хватаем элемент и где у нас на камере
+        // где мы схватили и поместили
+    }
+
+    /// <summary>
+    /// обновляет содержимое инвентаря, основываясь на информации в массиве items
+    /// </summary>
+    public void UpdateInventory()
+    {
+        for (int i = 0; i < _maxCount; i++) // обработка каждого элемента инвентаря
+        {
+            // проверяем, что id элемента не равен 0 и кол-во элементов больше 1
+            if (items[i]._id != 0 && items[i]._count > 1) // проверка, что в ячейке что-то присутствует 
+            {
+                // получаем все компоненты текста для данного элемента
+                Text[] texts = items[i]._itemGameObject.GetComponentsInChildren<Text>();
+
+                // обновляем текст для каждого компонента текста
+                foreach (Text text in texts)
+                {
+                    text.text = items[i]._count.ToString();
+                }
+            }
+            else
+            {
+                // получаем все компоненты текста для данного элемента
+                Text[] texts = items[i]._itemGameObject.GetComponentsInChildren<Text>();
+
+                // очищаем текст для каждого компонента текста
+                foreach (Text text in texts)
+                {
+                    text.text = "";
+                }
+            }
+
+            // получаем все компоненты фоток для данного элемента
+            Image[] images = items[i]._itemGameObject.GetComponentsInChildren<Image>();
+
+            // присваиваем фоткам спрайты из данных
+            foreach (Image image in images)
+            {
+                image.sprite = data.items[items[i]._id]._image;
+            }
+        }
+    }
+
+    /// <summary>
+    /// обработка выбора и перемещения элементов в инвентаре
+    /// </summary>
+    public void SelectObject()
+    {
+        if (_currentID == -1) // пустая ячейка
+        {
+            _currentID = int.Parse(_es.currentSelectedGameObject.name); // в число
+            _currentItem = CopyInventoryItem(items[_currentID]); // создание копии
+            _movingObject.gameObject.SetActive(true);
+            _movingObject.GetComponent<Image>().sprite = data.items[_currentItem._id]._image; 
+            // задаём спрайт перемещаемому объекту на основе данных элемента
+
+            AddItem(_currentID, data.items[0], 0); // id, item, count
+            // добавляем пустой элемент в инвентарь для замены перемещаемого элемента
+
+        }
+        else
+        {
+            AddInventoryItem(_currentID, items[int.Parse(_es.currentSelectedGameObject.name)]);
+            // добавляем выбранный элемент в инвентарь
+
+            AddInventoryItem(int.Parse(_es.currentSelectedGameObject.name), _currentItem);
+            // замена выбранного элемента на перемещаемый элемент
+
+            _currentID = -1;
+
+            _movingObject.gameObject.SetActive(false); // всё, мы перенесли наш предмет
+
+        }
+    }
+
+    /// <summary>
+    /// когда мы берём курсором что-то, то всё содержимое ячейки должно скопироваться в момент нашего переноса
+    /// </summary>
+    /// <param name="old">наша вещь</param>
+    /// <returns></returns>
+    public ItemInventory CopyInventoryItem(ItemInventory old)
+    {
+        ItemInventory New = new ItemInventory();
+
+        New._id = old._id; // когда мы куда-то ставим наш предмет в инвентаре, то он должен считать старую инфу и поместить в новую
+        New._itemGameObject = old._itemGameObject;
+        New._count = old._count; // и кол-во
+
+        return New;
+    }
+
+    
 }
 
 [System.Serializable]
