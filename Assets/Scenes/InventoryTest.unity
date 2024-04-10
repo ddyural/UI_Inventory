@@ -561,7 +561,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1880754683}
   - component: {fileID: 1880754682}
-  - component: {fileID: 1880754684}
   m_Layer: 0
   m_Name: Directional Light
   m_TagString: Untagged
@@ -649,18 +648,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
---- !u!114 &1880754684
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1880754681}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a68c43fe1f2a47cfa234b5eeaa98012, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1950618205
 GameObject:
   m_ObjectHideFlags: 0
@@ -693,20 +680,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   data: {fileID: 1950618207}
   items: []
-  _gameObjShow: {fileID: 5021055267138884037, guid: 0e9445e1af93ea5419a5389016e83c68, type: 3}
-  InventoryMainObject: {fileID: 917483949}
-  _maxCount: 30
-  _cam: {fileID: 2019411373}
-  _es: {fileID: 1034105410}
-  _currentID: -1
-  _currentItem:
-    _id: 0
-    _itemGameObject: {fileID: 0}
-    _count: 0
-  _movingObject: {fileID: 314220681}
-  _offest: {x: 1, y: -1, z: 0}
-  _backGround: {fileID: 271878710}
-  _inventoryMainRectTransform: {fileID: 0}
+  inventorySlotPrefab: {fileID: 5021055267138884037, guid: 0e9445e1af93ea5419a5389016e83c68, type: 3}
+  inventoryMainObject: {fileID: 917483949}
+  maxCount: 30
+  cam: {fileID: 2019411373}
+  es: {fileID: 1034105410}
+  currentID: -1
+  currentItem:
+    id: 0
+    itemGameObject: {fileID: 0}
+    count: 0
+  movingObject: {fileID: 314220681}
+  offset: {x: 1, y: -1, z: 0}
+  background: {fileID: 271878710}
 --- !u!114 &1950618207
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -720,15 +706,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   items:
-  - _id: 0
-    _name: Empty
-    _image: {fileID: 21300000, guid: cb1cbb3dad035fe42b80c2ba1d3cbe13, type: 3}
-  - _id: 1
-    _name: Bullet918
-    _image: {fileID: 21300000, guid: 0ffdb1707dbb0a144b3278045c78e715, type: 3}
-  - _id: 2
-    _name: Bullet556
-    _image: {fileID: 21300000, guid: d57176c397ee4b149addd97261223a85, type: 3}
+  - id: 0
+    name: Empty
+    image: {fileID: 21300000, guid: cb1cbb3dad035fe42b80c2ba1d3cbe13, type: 3}
+  - id: 1
+    name: Bullet918
+    image: {fileID: 21300000, guid: 0ffdb1707dbb0a144b3278045c78e715, type: 3}
+  - id: 2
+    name: Bullet556
+    image: {fileID: 21300000, guid: d57176c397ee4b149addd97261223a85, type: 3}
 --- !u!4 &1950618208
 Transform:
   m_ObjectHideFlags: 0

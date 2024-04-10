@@ -1,18 +1,16 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class DataBase : MonoBehaviour
 {
-    public List<Item> items = new List<Item>(); // здесь будет прописан каждый наш элемент
+    public List<Item> items = new List<Item>(); // each of our elements will be registered here
 }
 
-[System.Serializable] // поможет сохранять и загружать данные из объектов этого класса
+[System.Serializable] // will help you save and load data from objects of this class
 
-public class Item // в классе 3 поля: id, name и img, которые мы можем сериализовать для сохранения и загрузки 
+public class Item // there are 3 fields in the class: id, name and image, which we can serialize for saving and loading 
 {
-    public int _id; // уникальный первичный ключ
-    public string _name; // так будет называться
-    public Sprite _image; // иконка
+    public int id; // unique primary key
+    public string name; // name
+    public Sprite image; // icon
 }
