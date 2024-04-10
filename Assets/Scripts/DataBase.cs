@@ -14,5 +14,5 @@ public class Item // в классе 3 поля: id, name и img, которые
 {
     public int _id; // уникальный первичный ключ
     public string _name; // так будет называться
-    public Sprite _img; // иконка
+    public Sprite _image; // иконка
 }
