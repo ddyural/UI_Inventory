@@ -25,20 +25,19 @@ public class Inventory : MonoBehaviour
     public RectTransform _movingObject;
     public Vector3 _offest; // когда мы будем брать какой-то элемент, он должен немного сместиться от курсора
 
-    public Vector3 _pos;
+    public GameObject _backGround; // фон
 
+    /// <summary>
+    /// заполняем ячейки
+    /// </summary>
     public void Start()
     {
-        Vector3 _pos = Input.mousePosition + _offest; 
-        _pos.z = InventoryMainObject.GetComponent<RectTransform>().position.z;
-        
         if (items.Count == 0)
         {
             AddGraphics();
         }
 
-        // заполнение ячеек рандомно элементами, просто тест
-        for (int i = 0; i < _maxCount; i++) 
+        for (int i = 0; i < _maxCount; i++) // заполнение ячеек рандомно элементами, просто тест
         {
             AddItem(i, data.items[Random.Range(0, data.items.Count)], Random.Range(1, 99));
         }
@@ -51,11 +50,68 @@ public class Inventory : MonoBehaviour
             MoveObject();
         }
         UpdateInventory();
+
+        if (Input.GetKeyDown(KeyCode.I)) // открываем и закрываем инвентарь 
+        {
+            _backGround.SetActive(!_backGround.activeSelf); // активселф будет открывать и закрывать
+            if (_backGround.activeSelf)
+            {
+                UpdateInventory();
+            }
+
+        }
+    }
+
+    /// <summary>
+    /// позволяет стакаться предметам
+    /// </summary>
+    /// <param name="item">вещь</param>
+    /// <param name="_count">количество</param>
+    public void SearchForSameItem(Item item, int _count)
+    {
+        for(int i = 0; i < _maxCount; i++)
+        {
+            if (items[i]._id == item._id) // это 1 и тот же предмет
+            {
+                if (items[0]._count < 128) // стак - 128 предметов в ячейке
+                {
+                    items[i]._count += _count; // суммирует кол-во предметов в ячейке 
+
+                    if (items[i]._count > 128) // ячейка максимально заполнена
+                    {
+                        _count = items[i]._count - 128; // остаётся столько, сколько не поместилось в стак
+                        items[i]._count = 64;
+                    }
+                    else
+                    {
+                        _count = 0;
+                        i = _maxCount;
+                    }
+                }
+            }
+        }
+
+        if (_count > 0)
+        {
+            for(int i = 0; i < _maxCount; i++)
+            {
+                if (items[i]._id == 0)
+                {
+                    AddItem(i, item, _count);
+                    i = _maxCount;
+                    // если ячейка пустая, то в неё поместится предмет, который мы подобрали
+                    // или который не уместился в стак
+                    // в пустые ячейки может что-то помещаться
+
+                    // ячейки надо будет проверить и поместить 1 непоместившийся объектт
+                }
+            }
+        }
     }
 
 
     /// <summary>
-    /// добавление предмета в инвентарь
+    /// добвить итем
     /// </summary>
     /// <param name="_id">для сортировки</param>
     /// <param name="item">сам предмет</param>
@@ -79,7 +135,7 @@ public class Inventory : MonoBehaviour
     }
         
     /// <summary>
-    /// ItemInventory
+    /// добавить инвентарь-итем
     /// </summary>
     /// <param name="_id"></param>
     /// <param name="invItem"></param>
@@ -140,17 +196,17 @@ public class Inventory : MonoBehaviour
             items.Add(ii); // добавляем элемент в ItemInventory
         }
     }
-    
+
+
     /// <summary>
     /// передвигаем объект
     /// </summary>
     public void MoveObject()
     {
-        _movingObject.position = _cam.ScreenToWorldPoint(_pos); 
-        // изображения будут отталкиваться от камеры, где мы хватаем элемент 
-        // то есть когда мы передвигаем объект, картинка чуть-чуть смещаться
-        // значение _pos в Start()
-        
+        Vector3 pos = Input.mousePosition + _offest; // то есть когда мы передвигаем объект, картинка чуть-чуть смещаться
+        pos.z = InventoryMainObject.GetComponent<RectTransform>().position.z;
+        _movingObject.position = _cam.ScreenToWorldPoint(pos); // изображения будут отталкиваться от камеры, где мы хватаем элемент и где у нас на камере
+        // где мы схватили и поместили
     }
 
     /// <summary>
@@ -214,11 +270,35 @@ public class Inventory : MonoBehaviour
         }
         else
         {
-            AddInventoryItem(_currentID, items[int.Parse(_es.currentSelectedGameObject.name)]);
-            // добавляем выбранный элемент в инвентарь
+            ItemInventory II = items[int.Parse(_es.currentSelectedGameObject.name)];
 
-            AddInventoryItem(int.Parse(_es.currentSelectedGameObject.name), _currentItem);
-            // замена выбранного элемента на перемещаемый элемент
+            if (_currentItem._id != II._id)
+            {
+                AddInventoryItem(_currentID, II);
+                // добавляем выбранный элемент в инвентарь
+
+                AddInventoryItem(int.Parse(_es.currentSelectedGameObject.name), _currentItem);
+                // замена выбранного элемента на перемещаемый элемент
+            }
+            else
+            {
+                if (II._count + _currentItem._count <= 128) // будет стакаться до 128
+                {
+                    II._count += _currentItem._count;
+                }
+                else
+                {
+                    // в ячейке останется 128, а остаток улетит в другую ячейку
+                    AddItem(_currentID, data.items[II._id], II._count + _currentItem._count - 128); 
+
+                    II._count = 128;
+                }
+
+                II._itemGameObject.GetComponentInChildren<TextMeshProUGUI>().text = II._count.ToString();
+
+            }
+
+
 
             _currentID = -1;
 
@@ -244,6 +324,9 @@ public class Inventory : MonoBehaviour
     }
 }
 
+/// <summary>
+/// расписан объект
+/// </summary>
 [System.Serializable]
 public class ItemInventory
 {

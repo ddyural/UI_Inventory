@@ -670,8 +670,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1950618208}
-  - component: {fileID: 1950618207}
   - component: {fileID: 1950618206}
+  - component: {fileID: 1950618207}
   m_Layer: 0
   m_Name: GameLogic
   m_TagString: Untagged
@@ -691,10 +691,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3edaaec9e2c2b74593c1aebf04c8ac5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  data: {fileID: 1950618207}
   items: []
   _gameObjShow: {fileID: 5021055267138884037, guid: 0e9445e1af93ea5419a5389016e83c68, type: 3}
   InventoryMainObject: {fileID: 917483949}
   _maxCount: 30
+  _cam: {fileID: 2019411373}
+  _es: {fileID: 1034105410}
+  _currentID: -1
+  _currentItem:
+    _id: 0
+    _itemGameObject: {fileID: 0}
+    _count: 0
+  _movingObject: {fileID: 314220681}
+  _offest: {x: 1, y: -1, z: 0}
+  _backGround: {fileID: 271878710}
 --- !u!114 &1950618207
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -708,15 +719,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   items:
-  - _id: 1
+  - _id: 0
     _name: Empty
-    _img: {fileID: 21300000, guid: cb1cbb3dad035fe42b80c2ba1d3cbe13, type: 3}
-  - _id: 2
+    _image: {fileID: 21300000, guid: cb1cbb3dad035fe42b80c2ba1d3cbe13, type: 3}
+  - _id: 1
     _name: Bullet918
-    _img: {fileID: 0}
-  - _id: 3
+    _image: {fileID: 21300000, guid: 0ffdb1707dbb0a144b3278045c78e715, type: 3}
+  - _id: 2
     _name: Bullet556
-    _img: {fileID: 0}
+    _image: {fileID: 21300000, guid: d57176c397ee4b149addd97261223a85, type: 3}
 --- !u!4 &1950618208
 Transform:
   m_ObjectHideFlags: 0
@@ -743,9 +754,6 @@ GameObject:
   - component: {fileID: 2019411374}
   - component: {fileID: 2019411373}
   - component: {fileID: 2019411372}
-  - component: {fileID: 2019411377}
-  - component: {fileID: 2019411376}
-  - component: {fileID: 2019411375}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -828,42 +836,6 @@ Transform:
   - {fileID: 1619803723}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2019411375
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2019411371}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 23c1ce4fb46143f46bc5cb5224c934f6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &2019411376
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2019411371}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e016cd3e19113c244b51a6a1c29dd134, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &2019411377
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2019411371}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cbea0bbac43e8f54c972981d5ab9418e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
