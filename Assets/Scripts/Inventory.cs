@@ -30,7 +30,7 @@ public class Inventory : MonoBehaviour
         {
             Item randomItem = data.items[Random.Range(0, data.items.Count)];
             int randomCount = Random.Range(1, 99);
-            AddItem(i, randomItem, randomCount);
+            Filler.AddItem(items, i, randomItem, randomCount);
         }
         
         //graphicsHandler.InitializeInventory(items, inventorySlotPrefab, inventoryMainObject);
@@ -43,7 +43,6 @@ public class Inventory : MonoBehaviour
             MoveObject();
         }
         UpdateInventory();
-        
     }
     
     public void AddGraphics()
@@ -76,77 +75,6 @@ public class Inventory : MonoBehaviour
             tempButton.onClick.AddListener(delegate { SelectObject(); });
 
             items.Add(ii);
-        }
-    }
-
-    public void SearchForSameItem(Item item, int count)
-    {
-        for (int i = 0; i < maxCount; i++)
-        {
-            Debug.Log(item.name);
-            if (items[i].id == item.id && item.name != "Empty")
-            {
-                if (items[i].count < 128 && item.name != "Empty")
-                {
-                    items[i].count += count;
-
-                    if (items[i].count > 128)
-                    {
-                        count = items[i].count - 128;
-                        items[i].count = 64;
-                    }
-                    else
-                    {
-                        count = 0;
-                        i = maxCount;
-                    }
-                }
-            }
-        }
-
-        if (count > 0)
-        {
-            for (int i = 0; i < maxCount; i++)
-            {
-                if (items[i].id == 0)
-                {
-                    AddItem(i, item, count);
-                    break;
-                }
-            }
-        }
-    }
-
-    public void AddItem(int id, Item item, int count)
-    {
-        if (id >= 0 && id < items.Count)
-        {
-            items[id].id = item.id;
-            items[id].count = count;
-            items[id].itemGameObject.GetComponent<Image>().sprite = item.image;
-
-            TextMeshProUGUI[] texts = items[id].itemGameObject.GetComponentsInChildren<TextMeshProUGUI>();
-            foreach (TextMeshProUGUI text in texts)
-            {
-                text.text = (count > 0 && item.id != 0) ? count.ToString() : "";
-            }
-        }
-        else
-        {
-            Debug.LogError("Index out of bounds: " + id);
-        }
-    }
-
-    public void AddInventoryItem(int id, ItemInventory invItem)
-    {
-        items[id].id = invItem.id;
-        items[id].count = invItem.count;
-        items[id].itemGameObject.GetComponent<Image>().sprite = data.items[invItem.id].image;
-
-        TextMeshProUGUI[] texts = items[id].itemGameObject.GetComponentsInChildren<TextMeshProUGUI>();
-        foreach (TextMeshProUGUI text in texts)
-        {
-            text.text = (invItem.count > 0 && invItem.id != 0) ? invItem.count.ToString() : "";
         }
     }
     
@@ -214,7 +142,7 @@ public class Inventory : MonoBehaviour
             movingObject.gameObject.SetActive(true);
             movingObject.GetComponent<Image>().sprite = data.items[currentItem.id].image; 
 
-            AddItem(currentID, data.items[0], 0); 
+            Filler.AddItem(items, currentID, data.items[0], 0); 
         }
         else
         {
@@ -222,9 +150,9 @@ public class Inventory : MonoBehaviour
 
             if (currentItem.id != II.id)
             {
-                AddInventoryItem(currentID, II);
+                Filler.AddInventoryItem(items, currentID, II, data);
 
-                AddInventoryItem(int.Parse(es.currentSelectedGameObject.name), currentItem);
+                Filler.AddInventoryItem(items,int.Parse(es.currentSelectedGameObject.name), currentItem, data);
             }
             else
             {
@@ -234,7 +162,7 @@ public class Inventory : MonoBehaviour
                 }
                 else
                 {
-                    AddItem(currentID, data.items[II.id], II.count + currentItem.count - 128); 
+                    Filler.AddItem(items, currentID, data.items[II.id], II.count + currentItem.count - 128); 
 
                     II.count = 128;
                 }
@@ -246,8 +174,7 @@ public class Inventory : MonoBehaviour
             movingObject.gameObject.SetActive(false); 
         }
     }
-
-
+    
     public ItemInventory CopyInventoryItem(ItemInventory old)
     {
         ItemInventory New = new ItemInventory();

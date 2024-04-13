@@ -10,7 +10,4 @@ public class OpenInventory : MonoBehaviour
             background.SetActive(!background.activeSelf);
         }
     }
-        
-        
-    
 }

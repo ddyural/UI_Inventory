@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\DataBase.cs" />
     <Compile Include="Assets\Scripts\OpenInventory.cs" />
+    <Compile Include="Assets\Scripts\Filler.cs" />
     <Compile Include="Assets\Scripts\Inventory.cs" />
     <Compile Include="Assets\Scripts\ItemInventory.cs" />
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

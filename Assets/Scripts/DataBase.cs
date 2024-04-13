@@ -12,5 +12,11 @@ public class Item // there are 3 fields in the class: id, name and image, which 
 {
     public int id; // unique primary key
     public string name; // name
-    public Sprite image; // icon
+    public Sprite image; // 
+    public ItemType ItemType; 
+}
+
+public enum ItemType
+{
+    Empty, Patron, Money, Container
 }
